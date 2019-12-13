@@ -14,7 +14,6 @@ class CoreDataTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "reuse")
         self.setDBObserver()
         self.didChangeDB()
     }
@@ -46,11 +45,12 @@ class CoreDataTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuse", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         guard let item = self.modelList?[indexPath.row] else {
             return cell
         }
         cell.textLabel?.text = item.title
+        cell.detailTextLabel?.text = "\(item.amount)"
         return cell
     }
 
