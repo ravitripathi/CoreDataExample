@@ -76,4 +76,49 @@ class CoreDataManager {
         }
         return (try? JSONSerialization.data(withJSONObject: jsonArray))
     }
+    
+    
+    func createExportString() -> String? {
+        guard let data: [DataModel] = CoreDataManager.getAllData() else {
+            return nil
+        }
+        var export: String = NSLocalizedString("Bill Number, Title, Amount \n", comment: "")
+        for (index, item) in data.enumerated() {
+            export += "\(index),\(item.title),\(item.amount) \n"
+        }
+        return export
+    }
+    
+    func saveAndExport(exportString: String) {
+        let exportFilePath = NSTemporaryDirectory() + "itemlist.csv"
+        let exportFileURL = NSURL(fileURLWithPath: exportFilePath)
+        FileManager.default.createFile(atPath: exportFilePath, contents: NSData() as Data, attributes: nil)
+        //var fileHandleError: NSError? = nil
+        var fileHandle: FileHandle? = nil
+        do {
+            fileHandle = try FileHandle(forWritingTo: exportFileURL as URL)
+        } catch {
+            print("Error with fileHandle")
+        }
+
+        if fileHandle != nil {
+            fileHandle!.seekToEndOfFile()
+            let csvData = exportString.data(using: String.Encoding.utf8, allowLossyConversion: false)
+            fileHandle!.write(csvData!)
+
+            fileHandle!.closeFile()
+
+            let firstActivityItem = NSURL(fileURLWithPath: exportFilePath)
+            let activityViewController : UIActivityViewController = UIActivityViewController(
+                activityItems: [firstActivityItem], applicationActivities: nil)
+
+            activityViewController.excludedActivityTypes = [
+                UIActivity.ActivityType.assignToContact,
+                UIActivity.ActivityType.saveToCameraRoll,
+                UIActivity.ActivityType.postToFlickr,
+                UIActivity.ActivityType.postToVimeo,
+                UIActivity.ActivityType.postToTencentWeibo
+            ]
+        }
+    }
 }
